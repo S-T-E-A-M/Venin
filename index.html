@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Venin Studio</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs/loader.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; background-color: #1e1e1e; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; }
+        header { background-color: #2d2d2d; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #3c3c3c; }
+        h1 { margin: 0; font-size: 1.1rem; color: #4caf50; }
+        button { background-color: #388e3c; color: white; border: none; padding: 8px 16px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #2e7d32; }
+        #editor-container { flex: 2; width: 100%; }
+        #console-container { flex: 1; background-color: #181818; border-top: 2px solid #3c3c3c; display: flex; flex-direction: column; }
+        .console-header { background-color: #252526; padding: 5px 15px; font-size: 0.8rem; color: #888; text-transform: uppercase; }
+        #console { padding: 10px 15px; font-family: 'Consolas', monospace; font-size: 0.9rem; color: #00ff00; overflow-y: auto; white-space: pre-wrap; flex: 1; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🐍 Venin Studio (Exécution Python Native)</h1>
+        <button onclick="lancerCode()">⚡ Croc ! (Exécuter)</button>
+    </header>
+
+    <div id="editor-container"></div>
+
+    <div id="console-container">
+        <div class="console-header">Console de sortie</div>
+        <div id="console">Prêt à exécuter...</div>
+    </div>
+
+    <script>
+        let editor;
+
+        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            editor = monaco.editor.create(document.getElementById('editor-container'), {
+                value: 'affiche "Le venin coule dans les veines"',
+                language: 'python',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                fontSize: 14
+            });
+        });
+
+        async function lancerCode() {
+            const consoleBox = document.getElementById('console');
+            consoleBox.innerText = "Exécution par venin.py en cours...";
+
+            const response = await fetch('/run', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: editor.getValue() })
+            });
+
+            const data = await response.json();
+            consoleBox.innerText = data.output || "(Aucun affichage)";
+        }
+    </script>
+</body>
+</html>
